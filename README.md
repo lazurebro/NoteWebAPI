@@ -91,7 +91,7 @@ JWT_SECRET_KEY=16_length_symbol_security_key
 
 1. Соберите образ:
    ```bash
-   docker build -t notewebapi .
+   docker build -t noteapi .
    ```
 
 2. Запустите приложение с помощью docker-compose:
