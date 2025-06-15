@@ -1,0 +1,39 @@
+networks:
+  noteapi_app:
+
+services:
+  noteapi_db:
+    container_name: noteapi-db
+    image: mcr.microsoft.com/mssql/server
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q \"SELECT name FROM sys.databases\" -C"
+      ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+     - 1433:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_PASSWORD}
+    networks:
+     - noteapi_app
+
+  noteapi_app:
+    container_name: noteapi-app
+    image: noteapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_CONNECTION_STRING=Server=noteapi_db;Database=NoteApiDb;User Id=sa;Password=${DB_PASSWORD};Trusted_Connection=False;TrustServerCertificate=True;
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    ports:
+      - 8001:8080
+    depends_on:
+      noteapi_db:
+        condition: service_healthy
+    networks:
+     - noteapi_app
